@@ -9,18 +9,6 @@ class BandstopFilter : public Filter
     BandstopFilter(double low, double high, double fs, int order);
     ~BandstopFilter(){};
 
-     /**
-     * @brief Apply the filter to the data. The data sampling rate is assumed to be constant and equal to the sampling rate used to initialize the filter
-     *
-     * @param data_src The data to be filtered
-     * @param data_dst The filtered data
-     * @param init If true, the filter will be initialized. If false, the filter will be applied to the data with the previous state
-     */
-    void
-    apply(std::vector<double> &data_src,
-          std::vector<double> &data_dst,
-          bool init);
-
     /**
      * @brief Compute the coefficients of a Butterworth bandpass filter
      * 
@@ -36,9 +24,6 @@ class BandstopFilter : public Filter
     private:
     double m_low;
     double m_high;
-    double m_order;
-    std::vector<double**> m_coef;//ab
-    std::vector<std::vector<double>> m_w;
 };
 
 #endif // __FLTBS_HPP__

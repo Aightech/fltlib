@@ -24,7 +24,7 @@ class Filter
     virtual void
     apply(std::vector<double> &data_src,
           std::vector<double> &data_dst,
-          bool init = true) = 0;
+          bool init = true);
 
     /**
      * @brief Apply the filter to the data. Use this function if the data sampling rate is not constant. The data will be resampled to the sampling rate used to initialize the filter
@@ -52,6 +52,9 @@ class Filter
 
     protected:
     double m_fs;
+    double m_order;
+    std::vector<double**> m_coef;
+    std::vector<std::vector<double>> m_w;
 };
 
 #include "fltbp.hpp"

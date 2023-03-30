@@ -1,47 +1,15 @@
 #include "fltbp.hpp"
 
 BandpassFilter::BandpassFilter(double low, double high, double fs, int order)
-    : m_low(low), m_high(high), m_order(order)
+    : m_low(low), m_high(high)
 {
     m_fs = fs;
+    m_order = order;
     m_coef = butterworth_coefficients(order, low, high, fs);
     m_w.resize(5);
     for(int i = 0; i < 5; i++) m_w[i].resize(m_order / 4);
 };
 
-void
-BandpassFilter::apply(std::vector<double> &data_src,
-                      std::vector<double> &data_dst,
-                      bool init)
-{
-    //check if dst has the same size as src
-    if(data_dst.size() != data_src.size())
-        data_dst.resize(data_src.size());
-
-    if(init)
-        for(int i = 0; i < 5; i++)
-            for(int j = 0; j < m_order / 4; j++) m_w[i][j] = 0;
-
-    // Apply filter
-    for(int i = 0; i < data_src.size(); ++i)
-    {
-        for(int k = 0; k < m_order / 4; k++)
-        {
-            m_w[0][k] =
-                m_coef[k][0][0] * data_src[i] - m_coef[k][0][1] * m_w[1][k] -
-                m_coef[k][0][2] * m_w[2][k] - m_coef[k][0][3] * m_w[3][k] -
-                m_coef[k][0][4] * m_w[4][k];
-            data_dst[i] =
-                m_coef[k][1][0] * m_w[0][k] + m_coef[k][1][1] * m_w[1][k] +
-                m_coef[k][1][2] * m_w[2][k] + m_coef[k][1][3] * m_w[3][k] +
-                m_coef[k][1][4] * m_w[4][k];
-            m_w[4][k] = m_w[3][k];
-            m_w[3][k] = m_w[2][k];
-            m_w[2][k] = m_w[1][k];
-            m_w[1][k] = m_w[0][k];
-        }
-    }
-}
 
 std::vector<double **>
 BandpassFilter::butterworth_coefficients(int order,
@@ -83,3 +51,4 @@ BandpassFilter::butterworth_coefficients(int order,
     }
     return coefficients;
 }
+

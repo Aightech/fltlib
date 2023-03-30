@@ -37,9 +37,6 @@ class BandpassFilter : public Filter
     private:
     double m_low;
     double m_high;
-    double m_order;
-    std::vector<double**> m_coef;
-    std::vector<std::vector<double>> m_w;
 };
 
 #endif // __FLTBP_HPP__

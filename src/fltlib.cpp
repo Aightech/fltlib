@@ -43,6 +43,35 @@ Filter::resample(const std::vector<double> &data_src,
 
 void
 Filter::apply(std::vector<double> &data_src,
+                      std::vector<double> &data_dst,
+                      bool init)
+{
+    //check if dst has the same size as src
+    if(data_dst.size() != data_src.size())
+        data_dst.resize(data_src.size());
+
+    if(init)
+        for(int i = 0; i < 5; i++)
+            for(int j = 0; j < m_order / 4; j++) m_w[i][j] = 0;
+    // Apply filter
+    for(int i = 0; i < data_src.size(); ++i)
+    {
+        for(int n = 0; n < m_order / 4; n++)
+        {
+            m_w[0][n] = m_coef[n][0][0] * data_src[i];
+            for(int k = 1; k < m_w.size(); k++)
+                m_w[0][n] -= m_coef[n][0][k] * m_w[k][n];
+            data_dst[i]=0;
+            for(int k = 1; k < m_w.size(); k++)
+                data_dst[i] += m_coef[n][1][k] * m_w[k][n];
+            for(int k = m_w.size()-1; k > 0; k--)
+                m_w[k][n] = m_w[k-1][n];
+        }
+    }
+}
+
+void
+Filter::apply(std::vector<double> &data_src,
               std::vector<double> &data_dst,
               std::vector<double> &timestamps,
               bool init,
