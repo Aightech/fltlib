@@ -1,18 +1,28 @@
 #include "fltbp.hpp"
 
-BandpassFilter::BandpassFilter(double low, double high, double fs, int order)
-    : m_low(low), m_high(high)
+Bandpass::Bandpass(double fs, int order)
 {
+    m_name = "Bandpass";
     m_fs = fs;
+    //get the closest multiple of 4    
+    if(order % 4!=0)
+        order += 4 - order % 4;
     m_order = order;
-    m_coef = butterworth_coefficients(order, low, high, fs);
     m_w.resize(5);
     for(int i = 0; i < 5; i++) m_w[i].resize(m_order / 4);
 };
 
+Bandpass::Bandpass(double low, double high, double fs, int order)
+    : Bandpass(fs, order)
+{
+    m_low = low;
+    m_high = high;
+    m_coef = butterworth_coefficients(order, low, high, fs);
+};
+
 
 std::vector<double **>
-BandpassFilter::butterworth_coefficients(int order,
+Bandpass::butterworth_coefficients(int order,
                                          double low,
                                          double high,
                                          double fs)
@@ -20,8 +30,8 @@ BandpassFilter::butterworth_coefficients(int order,
     if(order % 4)
         order += 4 - order % 4;
 
-    static std::vector<double **> coefficients(order / 2);
-    for(int i = 0; i < order / 2; i++)
+    static std::vector<double **> coefficients(order / 4);
+    for(int i = 0; i < order / 4; i++)
     {
         coefficients[i] = new double *[2];
         for(int j = 0; j < 2; j++) coefficients[i][j] = new double[5];

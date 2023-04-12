@@ -8,10 +8,11 @@ int
 main(int argc, char **argv)
 {
     //generate a vector of 1000 elements
-    int n = 1000;
+    int n = 3000;
     std::vector<double> data_raw(n);
     std::vector<double> data_filtered(n);
     std::vector<double> timestamps(n);
+
 
     //fill the vector with a signal with a sinusoidal of 10Hz and a other sinusoidal of 100Hz
     //each time step is 1ms
@@ -22,14 +23,36 @@ main(int argc, char **argv)
     for(int i = 0; i < n; ++i)
     {
         timestamps[i] = i * dt;
-        data_raw[i] = sin(2 * M_PI * f1 * timestamps[i]) + sin(2 * M_PI * f2 * timestamps[i]);
+        data_raw[i] = sin(2 * M_PI * f1 * timestamps[i]) + sin(2 * M_PI * f2 * timestamps[i]) + sin(2 * M_PI * 50 * timestamps[i]);
+    }
+    Filter *filter;
+    int i = atoi(argv[1]);
+    switch (i)
+    {
+        case 0:
+            filter = new Lowpass(50, fs, 20);
+            break;
+        case 1:
+            filter = new Highpass(50, fs, 20);
+            break;
+        case 2:
+            filter = new Bandpass(49, 80, fs, 20);
+            break;
+        case 3:
+            filter = new Bandstop(48, 52, fs, 40);
+            break;
+        case 4://rectify
+            filter = new Rectifier();
+            break;
+        default:
+            filter = new Lowpass(50, fs, 2);
+            break;
     }
 
-    //Filter *filter = new BandpassFilter(20, 80, fs, 4);
-    //Filter *filter = new LowpassFilter(50, fs, 2);
-    //Filter *filter = new BandstopFilter(99, 101, fs, 4);
-    Filter *filter = new HighpassFilter(50, fs, 2);
-    filter->apply(data_raw, data_filtered, fs);
+    filter->print_coefficients();
+
+    filter->apply(data_raw, data_filtered);
+
 
     //write the data to a file timestamp, raw, filtered
     FILE *fp = fopen("data.txt", "w");

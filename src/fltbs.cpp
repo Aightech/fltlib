@@ -1,20 +1,29 @@
 #include "fltbs.hpp"
 
-#include "fltbp.hpp"
-
-BandstopFilter::BandstopFilter(double low, double high, double fs, int order)
-    : m_low(low), m_high(high)
+Bandstop::Bandstop(double fs, int order)
 {
+    m_name = "Bandstop";
     m_fs = fs;
+    //get the closest multiple of 4    
+    if(order % 4!=0)
+        order += 4 - order % 4;
     m_order = order;
-    m_coef = butterworth_coefficients(order, low, high, fs);
+
+    std::cout << "order: " << m_order << std::endl;
     m_w.resize(5);
     for(int i = 0; i < 5; i++) m_w[i].resize(m_order / 4);
 };
 
+Bandstop::Bandstop(double low, double high, double fs, int order)
+    : Bandstop(fs, order)
+{
+    m_low = low;
+    m_high = high;
+    m_coef = butterworth_coefficients(order, low, high, fs);
+};
 
 std::vector<double **>
-BandstopFilter::butterworth_coefficients(int order,
+Bandstop::butterworth_coefficients(int order,
                                          double low,
                                          double high,
                                          double fs)
@@ -22,8 +31,8 @@ BandstopFilter::butterworth_coefficients(int order,
     if(order % 4)
         order += 4 - order % 4;
 
-    static std::vector<double **> coefficients(order / 2);
-    for(int i = 0; i < order / 2; i++)
+    static std::vector<double **> coefficients(order / 4);
+    for(int i = 0; i < order / 4; i++)
     {
         coefficients[i] = new double *[2];
         for(int j = 0; j < 2; j++) coefficients[i][j] = new double[5];
@@ -45,11 +54,11 @@ BandstopFilter::butterworth_coefficients(int order,
         coefficients[i][0][4] = (b * b - 2.0 * b * r + 1.0) / s;
 
         r = 4.0 * a;
-        s = 4.0 * a * a + 2.0;
+        double s2 = 4.0 * a * a + 2.0;
         // b0, b1, b2, b3, b4
         coefficients[i][1][0] = 1 / s;
         coefficients[i][1][1] = -r / s;
-        coefficients[i][1][2] = 1;
+        coefficients[i][1][2] = s2/s;
         coefficients[i][1][3] = -r / s;
         coefficients[i][1][4] = 1 / s;
     }

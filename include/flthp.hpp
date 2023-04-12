@@ -3,16 +3,18 @@
 
 #include "fltlib.hpp"
 
-class HighpassFilter : public Filter
+class Highpass : public Filter
 {
+
     public:
-    HighpassFilter(double fc, double fs, int order);
-    ~HighpassFilter(){};
+    Highpass(double fc, double fs, int order);
+    ~Highpass(){};
 
     static std::vector<double**>
     butterworth_coefficients(int order, double fc, double fs);
 
     private:
+    Highpass(double fs, int order);
     double m_fc;
 };
 

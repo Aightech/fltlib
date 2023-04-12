@@ -1,18 +1,24 @@
 #include "flthp.hpp"
 
-HighpassFilter::HighpassFilter(double fc, double fs, int order)
-    : m_fc(fc)
+Highpass::Highpass(double fs, int order)
 {
+    m_name = "Highpass";
     m_fs = fs;
     m_order = order;
-    m_coef = butterworth_coefficients(order, fc, fs);
     m_w.resize(3);
     for(int i = 0; i < 3; i++) m_w[i].resize(m_order / 2);
 };
 
+Highpass::Highpass(double fc, double fs, int order)
+    : Highpass(fs, order)
+{
+    m_fc = fc;
+    m_coef = butterworth_coefficients(order, fc, fs);
+};
+
 
 std::vector<double**>
-HighpassFilter::butterworth_coefficients(int order, double fc, double fs)
+Highpass::butterworth_coefficients(int order, double fc, double fs)
 {
     if(order % 2)
         order++;

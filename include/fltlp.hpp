@@ -3,12 +3,12 @@
 
 #include "fltlib.hpp"
 
-class LowpassFilter : public Filter
+class Lowpass : public Filter
 {
     public:
-    LowpassFilter(double fc, double fs, int order);
-    LowpassFilter(double fc, double fs, double ep, int order);
-    ~LowpassFilter(){};
+    Lowpass(double fc, double fs, int order);
+    Lowpass(double fc, double fs, double ep, int order);
+    ~Lowpass(){};
 
     static std::vector<double **>
     butterworth_coefficients(int order, double fc, double fs);
@@ -17,6 +17,7 @@ class LowpassFilter : public Filter
     chebyshev_coefficients(int order, double fc, double ep, double fs);
 
     private:
+    Lowpass(double fs, int order);
     double m_fc;
 };
 

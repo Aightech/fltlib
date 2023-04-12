@@ -1,26 +1,29 @@
 #include "fltlp.hpp"
 
-LowpassFilter::LowpassFilter(double fc, double fs, int order) : m_fc(fc)
+Lowpass::Lowpass(double fs, int order)
 {
+    m_name = "Lowpass";
     m_fs = fs;
     m_order = order;
-    m_coef = butterworth_coefficients(order, fc, fs);
     m_w.resize(3);
     for(int i = 0; i < 3; i++) m_w[i].resize(m_order / 2);
 };
 
-LowpassFilter::LowpassFilter(double fc, double ep, double fs, int order)
-    : m_fc(fc)
+Lowpass::Lowpass(double fc, double fs, int order) : Lowpass(fs, order)
 {
-    m_fs = fs;
-    m_order = order;
+    m_fc=fc;
+    m_coef = butterworth_coefficients(order, fc, fs);
+};
+
+Lowpass::Lowpass(double fc, double ep, double fs, int order)
+    : Lowpass(fs, order)
+{
+    m_fc = fc;
     m_coef = chebyshev_coefficients(order, fc, ep, fs);
-    m_w.resize(3);
-    for(int i = 0; i < 3; i++) m_w[i].resize(m_order / 2);
 };
 
 std::vector<double **>
-LowpassFilter::butterworth_coefficients(int order, double fc, double fs)
+Lowpass::butterworth_coefficients(int order, double fc, double fs)
 {
     if(order % 2)
         order++;
@@ -49,7 +52,7 @@ LowpassFilter::butterworth_coefficients(int order, double fc, double fs)
 }
 
 std::vector<double **>
-LowpassFilter::chebyshev_coefficients(int order,
+Lowpass::chebyshev_coefficients(int order,
                                       double fc,
                                       double ep,
                                       double fs)

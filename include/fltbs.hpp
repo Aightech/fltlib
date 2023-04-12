@@ -3,11 +3,11 @@
 
 #include "fltlib.hpp"
 
-class BandstopFilter : public Filter
+class Bandstop : public Filter
 {
     public:
-    BandstopFilter(double low, double high, double fs, int order);
-    ~BandstopFilter(){};
+    Bandstop(double low, double high, double fs, int order);
+    ~Bandstop(){};
 
     /**
      * @brief Compute the coefficients of a Butterworth bandpass filter
@@ -22,6 +22,7 @@ class BandstopFilter : public Filter
     butterworth_coefficients(int order, double low, double high, double fs);
 
     private:
+    Bandstop(double fs, int order);
     double m_low;
     double m_high;
 };
