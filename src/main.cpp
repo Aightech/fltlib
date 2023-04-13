@@ -42,7 +42,7 @@ main(int argc, char **argv)
             filter = new Bandstop(48, 52, fs, 40);
             break;
         case 4://rectify
-            filter = new Rectifier();
+            filter = new Rectifier(fs);
             break;
         default:
             filter = new Lowpass(50, fs, 2);

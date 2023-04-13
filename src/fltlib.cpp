@@ -44,8 +44,8 @@ Filter::resample(const std::vector<double> &data_src,
 double
 Filter::apply(double value)
 {
-    
-    if(m_filtering_function==nullptr)
+
+    if(m_filtering_function == nullptr)
         return default_filtering_function(value);
     else
         return m_filtering_function(value);
@@ -59,8 +59,9 @@ Filter::default_filtering_function(double value)
         m_w[0][n] = m_coef[n][0][0] * value;
         for(int k = 1; k < m_w.size(); k++)
             m_w[0][n] -= m_coef[n][0][k] * m_w[k][n];
-        value =0;
-        for(int k = 0; k < m_w.size(); k++) value += m_coef[n][1][k] * m_w[k][n];
+        value = 0;
+        for(int k = 0; k < m_w.size(); k++)
+            value += m_coef[n][1][k] * m_w[k][n];
         for(int k = m_w.size() - 1; k > 0; k--) m_w[k][n] = m_w[k - 1][n];
     }
     return value;
@@ -81,28 +82,26 @@ Filter::apply(std::vector<double> &data_src,
 
     // Apply filter
     for(int i = 0; i < data_src.size(); ++i)
-    {
         data_dst[i] = apply(data_src[i]);
-    }
 }
 
 double
 Filter::apply(double value, double timestamp, std::vector<double> *data_dst)
 {
-    double filtered_value = 0;
-    double fixed_timestamp = 0;
-    int n = (timestamp - m_last_timestamp) / (1 / m_fs) + 1;
+    int n = (timestamp - m_timestamp) / (1 / m_fs);
     for(int i = 0; i < n; i++)
     {
-        m_last_value =
-            interpolate(m_last_timestamp + 1 / m_fs, m_last_timestamp,
-                        m_last_value, timestamp, value);
-        m_last_timestamp += 1 / m_fs;
-        filtered_value = apply(m_last_value);
+        m_value = interpolate(m_timestamp + 1 / m_fs, m_timestamp, m_value,
+                              timestamp, value);
+        m_timestamp += 1 / m_fs;
+        m_last_filtered_value = m_filtered_value;
+        m_filtered_value = apply(m_value);
         if(data_dst != nullptr)
-            data_dst->push_back(filtered_value);
+            data_dst->push_back(m_filtered_value);
     }
-    return filtered_value;
+    return interpolate(
+        timestamp, m_timestamp - 1 / m_fs, m_last_filtered_value, m_timestamp,
+        m_filtered_value); //return the filtered value interpolated at the coresponding timestamp
 }
 
 void
@@ -121,20 +120,19 @@ Filter::apply(std::vector<double> &data_src,
         resample(data_dst, data_dst, timestamps, m_fs);
 }
 
-void 
+void
 Filter::print_coefficients()
+{
+    printf("Filter: %s (order: %d, fs: %.2lf)\n", m_name.c_str(), (int)m_order,
+           m_fs);
+    for(int n = 0; n < m_coef.size(); n++)
     {
-        printf("Filter: %s (order: %d, fs: %.2lf)\n", m_name.c_str(), (int)m_order, m_fs);
-        for(int n = 0; n < m_coef.size(); n++)
-        {
-            printf("Stage: %d\n", n);
-            printf("a: [");
-            for(int i = 0; i < m_w.size(); i++)
-                printf("%.5lf\t", m_coef[n][0][i]);
-            printf(" ]\n");
-            printf("b: [");
-            for(int i = 0; i < m_w.size(); i++)
-                printf("%.5lf\t", m_coef[n][1][i]);
-            printf(" ]\n");
-        }
+        printf("Stage: %d\n", n);
+        printf("a: [");
+        for(int i = 0; i < m_w.size(); i++) printf("%.5lf\t", m_coef[n][0][i]);
+        printf(" ]\n");
+        printf("b: [");
+        for(int i = 0; i < m_w.size(); i++) printf("%.5lf\t", m_coef[n][1][i]);
+        printf(" ]\n");
     }
+}

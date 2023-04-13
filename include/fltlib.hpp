@@ -86,8 +86,19 @@ class Filter
     void
     print_coefficients();
 
-    void set_filtering_function(double (*filtering_function)(double)){
+    void
+    set_filtering_function(double (*filtering_function)(double))
+    {
         m_filtering_function = filtering_function;
+    }
+
+    void
+    set_coefficients(std::vector<double **> coef)
+    {
+        for(int i = 0; i < m_coef.size(); i++) delete[] m_coef[i];
+        m_coef = coef;
+        for(int i = 0; i < m_w.size(); i++)
+            for(int j = 0; j < m_coef[i][0][0]; j++) m_w[i][j] = 0;
     }
 
     protected:
@@ -95,9 +106,11 @@ class Filter
     double m_order;
     std::vector<double **> m_coef;
     std::vector<std::vector<double>> m_w;
-    double m_last_timestamp;
-    double m_last_value;
-    double m_n;
+    double m_timestamp = 0;
+    double m_value = 0;
+    double m_last_filtered_value = 0;
+    double m_filtered_value = 0;
+    double m_n = 0;
     //filtering function pointer
     double (*m_filtering_function)(double) = nullptr;
     std::string m_name;

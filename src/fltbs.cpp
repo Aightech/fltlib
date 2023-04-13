@@ -8,8 +8,6 @@ Bandstop::Bandstop(double fs, int order)
     if(order % 4!=0)
         order += 4 - order % 4;
     m_order = order;
-
-    std::cout << "order: " << m_order << std::endl;
     m_w.resize(5);
     for(int i = 0; i < 5; i++) m_w[i].resize(m_order / 4);
 };
