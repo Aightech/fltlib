@@ -54,15 +54,15 @@ Filter::apply(double value)
 double
 Filter::default_filtering_function(double value)
 {
-    for(int n = 0; n < m_w[0].size(); n++)
+    for(size_t n = 0; n < m_w[0].size(); n++)
     {
         m_w[0][n] = m_coef[n][0][0] * value;
-        for(int k = 1; k < m_w.size(); k++)
+        for(size_t k = 1; k < m_w.size(); k++)
             m_w[0][n] -= m_coef[n][0][k] * m_w[k][n];
         value = 0;
-        for(int k = 0; k < m_w.size(); k++)
+        for(size_t k = 0; k < m_w.size(); k++)
             value += m_coef[n][1][k] * m_w[k][n];
-        for(int k = m_w.size() - 1; k > 0; k--) m_w[k][n] = m_w[k - 1][n];
+        for(size_t k = m_w.size() - 1; k > 0; k--) m_w[k][n] = m_w[k - 1][n];
     }
     return value;
 }
@@ -77,11 +77,11 @@ Filter::apply(std::vector<double> &data_src,
         data_dst.resize(data_src.size());
 
     if(init)
-        for(int i = 0; i < m_w.size(); i++)
-            for(int j = 0; j < m_w[i].size(); j++) m_w[i][j] = 0;
+        for(size_t i = 0; i < m_w.size(); i++)
+            for(size_t j = 0; j < m_w[i].size(); j++) m_w[i][j] = 0;
 
     // Apply filter
-    for(int i = 0; i < data_src.size(); ++i)
+    for(size_t i = 0; i < data_src.size(); ++i)
         data_dst[i] = apply(data_src[i]);
 }
 
@@ -116,7 +116,7 @@ Filter::apply(std::vector<double> &data_src,
     // Apply bandpass filter on the resampled data
     apply(data_dst, data_dst, m_fs);
 
-    if(resample) // Resample the filtered data to the original sampling rate
+    if(reresample) // Resample the filtered data to the original sampling rate
         resample(data_dst, data_dst, timestamps, m_fs);
 }
 
@@ -125,14 +125,14 @@ Filter::print_coefficients()
 {
     printf("Filter: %s (order: %d, fs: %.2lf)\n", m_name.c_str(), (int)m_order,
            m_fs);
-    for(int n = 0; n < m_coef.size(); n++)
+    for(size_t n = 0; n < m_coef.size(); n++)
     {
-        printf("Stage: %d\n", n);
+        printf("Stage: %ld\n", n);
         printf("a: [");
-        for(int i = 0; i < m_w.size(); i++) printf("%.5lf\t", m_coef[n][0][i]);
+        for(size_t i = 0; i < m_w.size(); i++) printf("%.5lf\t", m_coef[n][0][i]);
         printf(" ]\n");
         printf("b: [");
-        for(int i = 0; i < m_w.size(); i++) printf("%.5lf\t", m_coef[n][1][i]);
+        for(size_t i = 0; i < m_w.size(); i++) printf("%.5lf\t", m_coef[n][1][i]);
         printf(" ]\n");
     }
 }

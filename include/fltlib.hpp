@@ -95,9 +95,9 @@ class Filter
     void
     set_coefficients(std::vector<double **> coef)
     {
-        for(int i = 0; i < m_coef.size(); i++) delete[] m_coef[i];
+        for(size_t i = 0; i < m_coef.size(); i++) delete[] m_coef[i];
         m_coef = coef;
-        for(int i = 0; i < m_w.size(); i++)
+        for(size_t i = 0; i < m_w.size(); i++)
             for(int j = 0; j < m_coef[i][0][0]; j++) m_w[i][j] = 0;
     }
 

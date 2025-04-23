@@ -4,11 +4,13 @@
 
 #include "fltlib.hpp"
 
+//gnuplot -p -e "plot 'data.txt' u 1:2 w lines, 'data.txt' u 1:3 w lines"
+
 int
 main(int argc, char **argv)
 {
     //generate a vector of 1000 elements
-    int n = 3000;
+    int n = 1000;
     std::vector<double> data_raw(n);
     std::vector<double> data_filtered(n);
     std::vector<double> timestamps(n);
