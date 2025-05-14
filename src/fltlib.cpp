@@ -7,10 +7,10 @@ Filter::interpolate(double x, double x1, double y1, double x2, double y2)
 };
 
 void
-Filter::resample(const std::vector<double> &data_src,
-                 std::vector<double> &data_dst,
-                 const std::vector<double> &timestamps,
-                 double sampling_rate)
+Filter::resample2uniform(const std::vector<double> &data_src,
+                         std::vector<double> &data_dst,
+                         const std::vector<double> &timestamps,
+                         double sampling_rate)
 {
     double start_time = timestamps.front();
     double end_time = timestamps.back();
@@ -41,6 +41,44 @@ Filter::resample(const std::vector<double> &data_src,
     }
 };
 
+void
+Filter::resample2original(const std::vector<double> &data_src,
+                          std::vector<double> &data_dst,
+                          double src_fs,
+                          const std::vector<double> &timestamps)
+{
+    data_dst.clear();
+    if(data_src.empty() || timestamps.empty() || src_fs <= 0.0)
+        return;
+
+    const double t0 = timestamps.front();
+    const double dt = 1.0 / src_fs;
+    const size_t N = data_src.size();
+    data_dst.reserve(timestamps.size());
+
+    for(double t : timestamps)
+    {
+        double p = (t - t0) * src_fs; // fractional index in data_src
+        if(p <= 0.0)
+        {
+            data_dst.push_back(data_src.front());
+        }
+        else if(p >= double(N - 1))
+        {
+            data_dst.push_back(data_src.back());
+        }
+        else
+        {
+            size_t idx = size_t(std::floor(p));
+            double t1 = t0 + idx * dt;
+            double t2 = t1 + dt;
+            double y1 = data_src[idx];
+            double y2 = data_src[idx + 1];
+            data_dst.push_back(interpolate(t, t1, y1, t2, y2));
+        }
+    }
+}
+
 double
 Filter::apply(double value)
 {
@@ -68,7 +106,7 @@ Filter::default_filtering_function(double value)
 }
 
 void
-Filter::apply(std::vector<double> &data_src,
+Filter::apply(const std::vector<double> &data_src,
               std::vector<double> &data_dst,
               bool init)
 {
@@ -105,19 +143,36 @@ Filter::apply(double value, double timestamp, std::vector<double> *data_dst)
 }
 
 void
-Filter::apply(std::vector<double> &data_src,
+Filter::apply(const std::vector<double> &data_src,
               std::vector<double> &data_dst,
-              std::vector<double> &timestamps,
+              const std::vector<double> &timestamps,
               bool init,
               bool reresample)
 {
-    // Interpolate data to a uniform grid
-    resample(data_src, data_dst, timestamps, init);
-    // Apply bandpass filter on the resampled data
-    apply(data_dst, data_dst, m_fs);
+    // 1) uniform grid at m_fs
+    std::vector<double> uniform;
+    resample2uniform(data_src, uniform, timestamps, m_fs);
 
-    if(reresample) // Resample the filtered data to the original sampling rate
-        resample(data_dst, data_dst, timestamps, m_fs);
+    // 2) in-place filter on uniform
+    std::vector<double> filtered = uniform;
+    apply(filtered, filtered, init);
+
+    if(reresample)
+    {
+        // 3) project back to original timebase
+        std::vector<double> original;
+        resample2original(filtered, // src
+                          original, // dst
+                          m_fs,
+                          timestamps // target times
+        );
+        data_dst = std::move(original);
+    }
+    else
+    {
+        // if no re-resample, return the uniform result
+        data_dst = std::move(filtered);
+    }
 }
 
 void
@@ -129,10 +184,12 @@ Filter::print_coefficients()
     {
         printf("Stage: %ld\n", n);
         printf("a: [");
-        for(size_t i = 0; i < m_w.size(); i++) printf("%.5lf\t", m_coef[n][0][i]);
+        for(size_t i = 0; i < m_w.size(); i++)
+            printf("%.5lf\t", m_coef[n][0][i]);
         printf(" ]\n");
         printf("b: [");
-        for(size_t i = 0; i < m_w.size(); i++) printf("%.5lf\t", m_coef[n][1][i]);
+        for(size_t i = 0; i < m_w.size(); i++)
+            printf("%.5lf\t", m_coef[n][1][i]);
         printf(" ]\n");
     }
 }

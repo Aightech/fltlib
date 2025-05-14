@@ -24,10 +24,16 @@ class Filter
     interpolate(double x, double x1, double y1, double x2, double y2);
 
     static void
-    resample(const std::vector<double> &data_src,
-             std::vector<double> &data_dst,
-             const std::vector<double> &timestamps,
-             double sampling_rate);
+    resample2uniform(const std::vector<double> &data_src,
+                  std::vector<double> &data_dst,
+                  const std::vector<double> &timestamps,
+                  double sampling_rate);
+    
+    static void
+    resample2original(const std::vector<double> &data_src,
+                  std::vector<double> &data_dst,
+                  double src_fs,
+                  const std::vector<double> &timestamps);
 
     public:
     Filter(){};
@@ -51,7 +57,7 @@ class Filter
      * @param init If true, the filter will be initialized. If false, the filter will be applied to the data with the previous state
      */
     virtual void
-    apply(std::vector<double> &data_src,
+    apply(const std::vector<double> &data_src,
           std::vector<double> &data_dst,
           bool init = true);
 
@@ -65,11 +71,11 @@ class Filter
      * @param reresample True if the filtered data should be resampled to the sampling rate used to initialize the filter, false otherwise
      */
     void
-    apply(std::vector<double> &data_src,
+    apply(const std::vector<double> &data_src,
           std::vector<double> &data_dst,
-          std::vector<double> &timestamps,
+          const std::vector<double> &timestamps,
           bool init,
-          bool reresample = false);
+          bool reresample = false); 
 
     /**
      * @brief Apply the filter to the data. Use this function if the data sampling rate is not constant. The data will be resampled to the sampling rate used to initialize the filter
