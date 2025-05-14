@@ -1,6 +1,6 @@
 # fltlib
 
-Simple library to ..............
+Simple library to filter vector of data using different types of filters.
 
 # Building source code
 
